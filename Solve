@@ -1,160 +1,115 @@
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import java.util.EmptyStackException;
+import java.util.Stack;
 
 /**
  * 
- * @author Anubhav Balakrishnan
- *
  */
 
-@SuppressWarnings("serial")
-public class GUI extends JFrame implements ActionListener {
-	/**
-	 * Label signifying where you type an english phrase
-	 */
-	private JLabel English;
-	/**
-	 * Label signifying where you type a phrase in morse code
-	 */
-	private JLabel Morse;
-	/**
-	 * Panel for all labels and text fields
-	 */
-	private JPanel translatePanel;
-	/**
-	 * Text Field to type in english
-	 */
-	private JTextField englishAppear = new JTextField(20);
-	/**
-	 * Text Field to type in Morse code
-	 */
-	private JTextField morseAppear = new JTextField(20);
-	/**
-	 * Button to press to translate
-	 */
-	private JButton Translate;
-	/**
-	 * Array of english characters for comparison
-	 */
-	private String englishLan[] = { "a", "b", "c", "d", "e", "f", "g", "h",
-			"i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u",
-			"v", "w", "x", "y", "z", "1", "2", "3", "4", "5", "6", "7", "8",
-			"9", "0" };
-	/**
-	 * Array of morse characters for comparison
-	 */
-	private String morseLan[] = { ".-", "-...", "-.-.", "-..", ".", "..-.",
-			"--.", "....", "..", ".---", "-.-", ".-..", "--", "-.", "---",
-			".--.", "--.-", ".-.", "...", "-", "..-", "...-", ".--", "-..-",
-			"-.--", "--..", ".----", "..---", "...--", "....-", ".....",
-			"-....", "--...", "---..", "----.", "-----" };
+/**
+ * @author Anubhav
+ *
+ */
+public class PostEval {
+	/** Holds all numbers and expressions in the equation given by the user */
+	@SuppressWarnings("rawtypes")
+	private Stack stack;
 
+	@SuppressWarnings("rawtypes")
 	/**
-	 * Sets up the GUI
+	 * Constructor for PostEvalv, initializing the Stack.
 	 */
-	public GUI() {
-		// Set up GUI
-		super("Morse Translator");
-		English = new JLabel("English");
-		Morse = new JLabel("Morse ");
-		Translate = new JButton("Translate");
-		Translate.addActionListener(this);
-		translatePanel = new JPanel();
-		add(translatePanel);
-		translatePanel.add(English);
-		englishAppear = new JTextField(30);
-		englishAppear.setEditable(true);
-		morseAppear = new JTextField(30);
-		morseAppear.setEditable(true);
-		translatePanel.add(englishAppear);
-		translatePanel.add(Translate);
-		translatePanel.add(morseAppear);
-		translatePanel.add(Morse);
-
+	public PostEval() {
+		stack = new Stack();
 	}
 
-	@Override
+	@SuppressWarnings("unchecked")
 	/**
-	 * Performed when translate button is pressed
-	 * Translates and puts translation on screen
-	 * @param e: Action event
+	 * Goes through the equation and based on what sign it is, it will calculate from the methods. Until a right parathesis is found in the string
+	 * @param buffer: Equation that the user inputed
 	 */
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == Translate) {
-			String english = "";
-			String morse = "";
-			english = englishAppear.getText();
-			morse = morseAppear.getText();
-			String englishLower = english.toLowerCase();
-			String[] newEnglish = englishLower.split("");
-			String[] englishTranslate = new String[105];
-			String[] morseTranslate = new String[105];
-			// Splits either when there is one space or 2 spaces
-			String[] newMorse = morse.split("(?<! ) |(?<= {2})");
-			int k = 0;
-			if (englishAppear.getText().length() == 0
-					&& morseAppear.getText().length() != 0) {
-				for (int i = 0; i < newMorse.length; i++) {
-					for (int j = 0; j < 36; j++) {
-						if (newMorse[i].equals(" ")) {
-							morseTranslate[k] = " ";
-							k++;
-							j = 37;
-						} else if (newMorse[i].equals(morseLan[j])) {
-							morseTranslate[k] = englishLan[j];
-							k++;
-						}
-					}
-
+	public void evaluatePostfixExpression(StringBuffer buffer) {
+		String bufferString = buffer.toString();
+		String[] bufferSplit = bufferString.split(" ");
+		int j=0;
+		
+			while (!bufferSplit[j].equals(")")) {
+				if (bufferSplit[j].equals("+") || bufferSplit[j].equals("-")
+						|| bufferSplit[j].equals("/")
+						|| bufferSplit[j].equals("*")
+						|| bufferSplit[j].equals("^")
+						|| bufferSplit[j].equals("%")) {
+					stack.push(Calculate(bufferSplit[j]));
+				} else if (isNum(bufferSplit[j])) {
+					stack.push(Integer.parseInt(bufferSplit[j]));
+				} else {
+					System.out.print("Error: Format Error\n ");
 				}
-				StringBuffer result = new StringBuffer();
-				for (int i = 0; i < morseTranslate.length
-						&& morseTranslate[i] != null; i++) {
-					result.append(morseTranslate[i]);
-				}
+				j++;
+			
 
-				String finalTranslate2 = result.toString();
-				englishAppear.setText(finalTranslate2);
-
-			} else if (englishAppear.getText().length() != 0
-					&& morseAppear.getText().length() == 0) {
-				for (int i = 0; i < englishLower.length(); i++) {
-					for (int j = 0; j < 36; j++) {
-						if (newEnglish[i].equals(" ")) {
-							englishTranslate[k] = " ";
-							k++;
-							j = 36;
-						} else if (newEnglish[i].equals(englishLan[j])) {
-							englishTranslate[k] = morseLan[j];
-							k++;
-							englishTranslate[k] = " ";
-							k++;
-
-						}
-					}
-				}
-				StringBuffer result2 = new StringBuffer();
-				for (int i = 0; i < englishTranslate.length
-						&& englishTranslate[i] != null; i++) {
-					result2.append(englishTranslate[i]);
-				}
-				String finalTranslate = result2.toString();
-				System.out.print(finalTranslate);
-				morseAppear.setText(finalTranslate);
-
-			}
-
-		} else if (englishAppear.getText().length() != 0
-				&& morseAppear.getText().length() != 0) {
-			englishAppear.setText("Only type in one of me");
-			morseAppear.setText("Only type in one of me");
 		}
+	}
+
+	/**
+	 * If the string was a operator then it calculates the last two integers by
+	 * popping them and calculate them.
+	 * 
+	 * @param buffer2
+	 *            : String at location j from the string array
+	 * @throws EmptyStackException
+	 * 
+	 */
+	private int Calculate(String buffer2) {
+		try {
+			int op1 = (Integer) (stack.pop());
+			int op2 = (Integer) (stack.pop());
+			if (buffer2.equals("+")) {
+				return (op1 + op2);
+			} else if (buffer2.equals("-")) {
+				return (op2 - op1);
+			} else if (buffer2.equals("*")) {
+				return (op1 * op2);
+
+			} else if (buffer2.equals("/")) {
+				return (op2 / op1);
+			} else if (buffer2.equals("^")) {
+				return (int) (Math.pow(op2, op1));
+			} else if (buffer2.equals("%")) {
+				return (op2 % op1);
+			} else {
+				return 0;
+			}
+		} catch (EmptyStackException e) {
+
+		}
+		return 0;
+	}
+
+	/**
+	 * Checks if string inputed is a number
+	 * 
+	 * @param buffer2
+	 *            : String at location j from the string array
+	 * @return true: if the string was a number
+	 * @return false: if it is an operator
+	 */
+	private boolean isNum(String buffer2) {
+		int intCheck = Integer.parseInt(buffer2);
+		if (intCheck / 1 == intCheck) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Returns the result to the main function for printing
+	 * 
+	 * @return result from calculations
+	 */
+	public int result() {
+
+		return (Integer) (stack.pop());
 	}
 
 }
