@@ -1,0 +1,30 @@
+/**
+ * 
+ */
+import java.util.*;
+/**
+ * @author Anubhav
+ *
+ */
+public class Main {
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+	
+		System.out.println("Enter your equation");
+		@SuppressWarnings("resource")
+		Scanner scan=new Scanner(System.in);
+		/** Brings in the equation from scan */
+		StringBuffer buffer=new StringBuffer(scan.nextLine());
+		buffer.append(" )");
+		PostEval post=new PostEval();
+		post.evaluatePostfixExpression(buffer);
+		/**holds the answer from the result method*/
+		int answer=post.result();
+		System.out.print(answer);
+
+	}
+
+}
